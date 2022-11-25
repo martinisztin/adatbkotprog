@@ -451,6 +451,33 @@ function feladatok_lekerdez() {
 	return $res;
 }
 
+function markak_lekerdez() {
+
+	if(!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "SELECT DISTINCT marka FROM aru";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
+
+function specific_aru_by_marka($marka) {
+	if(!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "SELECT * FROM aru WHERE marka = '$marka'";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
+
 function olvasolistatLeker() {
 	
 	if ( !($conn = db_kapcsolat()) ) { // ha nem sikerult csatlakozni, akkor kilepunk

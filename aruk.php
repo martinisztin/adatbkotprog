@@ -20,6 +20,12 @@ include_once('use/u_dao.php');
 	<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#szerkesztesModal" <?php if(!isset($_GET['id'])) {echo 'disabled';} ?>>
   		Szerkesztés
 	</button>
+	<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#szuresModal">
+  		Szűrés
+	</button>
+	<?php if(isset($_GET['marka'])) : ?>
+		<a class="btn btn-danger" href="aruk.php">Szűrés törlése</a>
+	<?php endif ?>
 </div>
 
 
@@ -139,6 +145,46 @@ include_once('use/u_dao.php');
 <!-- modal end -->
 <?php endif ?>
 
+<!-- szures modal -->
+<?php 
+
+
+?>
+<div class="modal fade" id="szuresModal" tabindex="-1" aria-labelledby="szuresModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="szuresModalLabel">Szűrés márka szerint</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+	  <div class="container" style="width:400px;">
+	<form method="GET" action="aruk.php" accept-charset="utf-8">
+		<div class="form-group">
+   			<label>Márka: </label>
+   			<select name="marka" class="form-control form-select">
+				<?php 
+				$szurestargyak = markak_lekerdez();
+				while($fetch = mysqli_fetch_assoc($szurestargyak)) {
+					echo '<option value='.$fetch['marka'].'>'.$fetch['marka'].'</option>';
+				}
+				?>
+			</select>
+		</div>
+   		<br>
+		<div class="form-group">
+   			<input type="submit" value="Elküld" class="form-control btn btn-primary"/>
+		</div>
+	</form>
+</div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!-- modal end -->
+
 
 <hr>
 <div class="container">
@@ -149,7 +195,11 @@ include_once('use/u_dao.php');
 		<tr>
 			<th>Kijelölés
 				<?php if(isset($_GET['id'])) : ?>
-					<a href="aruk.php">
+					<?php if(isset($_GET['marka'])) : ?>
+						<a href="aruk.php?marka=<?= $_GET['marka'] ?>">
+					<?php else: ?>
+						<a href="aruk.php">
+					<?php endif ?>
 						<i class="fa fa-times" aria-hidden="true"></i>
 					</a>
 				<?php endif ?>
@@ -164,25 +214,51 @@ include_once('use/u_dao.php');
 		</tr>
 
 	<?php
+		if(isset($_GET['marka'])) {
+			$szurt_aruk = specific_aru_by_marka($_GET['marka']);
 
-		$aruk = aruk_lekerdez();
+			while($fetch = mysqli_fetch_assoc($szurt_aruk)) {
+				$adottRaktar = mysqli_fetch_assoc(specific_raktar_lekerdez($fetch['raktar_azonosito']));
 
-		while($fetch = mysqli_fetch_assoc($aruk)) {
-			$adottRaktar = mysqli_fetch_assoc(specific_raktar_lekerdez($fetch['raktar_azonosito']));
-			
-			echo '<tr>';
-			echo '<td><input type="radio" class="form-check-input" onclick="window.location=\'aruk.php?id='. $fetch['azonosito'] .'\'" name="select" value="'. $fetch['azonosito'] .'" ';
-			if(isset($_GET['id']) && $_GET['id'] == $fetch['azonosito']) { echo 'checked'; }
-			echo '>';
-			echo '<td>'. $fetch["marka"] .'</td>';
-			echo '<td>'. $fetch["nev"] .'</td>';
-			echo '<td>'. $fetch["beszerzesi_ar"] .'</td>';
-			echo '<td>'. $fetch["szin"] .'</td>';
-			echo '<td>'. $fetch["raktar_azonosito"]. ' - ' . $adottRaktar['varos'] .'</td>';
-			echo '<td><a class="btn btn-link" href="delete_aru.php?id='.$fetch['azonosito'].'">Törlés</a>';
-			echo '</tr>';
-		} 
-		mysqli_free_result($aruk);
+				echo '<tr>';
+				if(isset($_GET['marka'])) {
+					echo '<td><input type="radio" class="form-check-input" onclick="window.location=\'aruk.php?marka='.$_GET['marka'].'&id='. $fetch['azonosito'] .'\'" name="select" value="'. $fetch['azonosito'] .'" ';
+				} else {
+					echo '<td><input type="radio" class="form-check-input" onclick="window.location=\'aruk.php?id='. $fetch['azonosito'] .'\'" name="select" value="'. $fetch['azonosito'] .'" ';
+				}
+				if(isset($_GET['id']) && $_GET['id'] == $fetch['azonosito']) { echo 'checked'; }
+				echo '>';
+				echo '<td>'. $fetch["marka"] .'</td>';
+				echo '<td>'. $fetch["nev"] .'</td>';
+				echo '<td>'. $fetch["beszerzesi_ar"] .'</td>';
+				echo '<td>'. $fetch["szin"] .'</td>';
+				echo '<td>'. $fetch["raktar_azonosito"]. ' - ' . $adottRaktar['varos'] .'</td>';
+				echo '<td><a class="btn btn-link" href="delete_aru.php?id='.$fetch['azonosito'].'">Törlés</a>';
+				echo '</tr>';
+			}
+		
+		}
+		else {
+			$aruk = aruk_lekerdez();
+
+			while($fetch = mysqli_fetch_assoc($aruk)) {
+				$adottRaktar = mysqli_fetch_assoc(specific_raktar_lekerdez($fetch['raktar_azonosito']));
+				
+				echo '<tr>';
+				echo '<td><input type="radio" class="form-check-input" onclick="window.location=\'aruk.php?id='. $fetch['azonosito'] .'\'" name="select" value="'. $fetch['azonosito'] .'" ';
+				if(isset($_GET['id']) && $_GET['id'] == $fetch['azonosito']) { echo 'checked'; }
+				echo '>';
+				echo '<td>'. $fetch["marka"] .'</td>';
+				echo '<td>'. $fetch["nev"] .'</td>';
+				echo '<td>'. $fetch["beszerzesi_ar"] .' Ft</td>';
+				echo '<td>'. $fetch["szin"] .'</td>';
+				echo '<td>'. $fetch["raktar_azonosito"]. ' - ' . $adottRaktar['varos'] .'</td>';
+				echo '<td><a class="btn btn-link" href="delete_aru.php?id='.$fetch['azonosito'].'">Törlés</a>';
+				echo '</tr>';
+			} 
+			mysqli_free_result($aruk);
+		}
+
 
 	?>
 </table>
