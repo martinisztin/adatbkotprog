@@ -8,7 +8,7 @@ $kovetkezo_erkezes = $_POST['kovetkezo_erkezes'];
 
 if (!empty($aru_azonosito) && !empty($mennyiseg) && !empty($kovetkezo_erkezes)) {
 
-	$res = keszlet_hozzaadasa($aru_azonosito, $mennyiseg, $kovetkezo_erkezes);
+	$res = keszlet_szerkesztese($aru_azonosito, $mennyiseg, $kovetkezo_erkezes);
 	
     if($res) {
 		header("Location: keszlet.php");

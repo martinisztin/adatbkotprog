@@ -14,12 +14,9 @@ include_once('use/u_dao.php');
 
 <br>
 <div class="container">
-	<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#ujRekord">
-  		Új áru hozzáadása
-	</button>
-	<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#szerkesztesModal" <?php if(!isset($_GET['id'])) {echo 'disabled';} ?>>
-  		Szerkesztés
-	</button>
+	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ujRekord">
+        Új áru hozzáadása
+    </button>
 </div>
 
 
@@ -79,65 +76,25 @@ include_once('use/u_dao.php');
 <!-- modal end -->
 
 <!-- szerkesztes modal -->
-<?php if(isset($_GET['id']) && $szerk_fetch = mysqli_fetch_assoc(specific_aru_lekerdez($_GET['id']))) : ?>
-<div class="modal fade" id="szerkesztesModal" tabindex="-1" aria-labelledby="szerkesztesModalLabel" aria-hidden="true">
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="szerkesztesModalLabel">Áru szerkesztése</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        
-	  <div class="container" style="width:400px;">
-	<form method="POST" action="update_aru.php" accept-charset="utf-8">
-		<div class="form-group">
-
-		<input type="hidden" name="azonosito" value="<?= $szerk_fetch['azonosito'] ?>" class="form-control"/>
-
-   			<label>Márka: </label>
-   			<input type="text" name="marka" value="<?= $szerk_fetch['marka'] ?>" class="form-control" required/>
-		</div>
-   		<br>
-	   <div class="form-group">
-   			<label>Neve: </label>
-   			<input type="text" name="nev" value="<?= $szerk_fetch['nev'] ?>" class="form-control" required/>
-		</div>
-		<br>
-		<div class="form-group">
-   			<label>Beszerzési ára: </label>
-   			<input type="text" name="beszerzesi_ar" value="<?= $szerk_fetch['beszerzesi_ar'] ?>" class="form-control" required/>
-		</div>
-		<br>
-		<div class="form-group">
-   			<label>Szín: </label>
-   			<input type="text" name="szin" value="<?= $szerk_fetch['szin'] ?>" class="form-control" required/>
-   		</div>
-		<br>
-		<div class="form-group">
-   			<label>Elhelyezkedése (melyik raktár): </label>
-   			<select name="raktar_azonosito" value="<?= $szerk_fetch['raktar_azonosito'] ?>" class="form-control form-select">
-				<?php 
-				$raktarak = raktar_lekerdez();
-				while($fetch = mysqli_fetch_assoc($raktarak)) {
-					echo '<option value='.$fetch['azonosito'].'>'.$fetch['azonosito'].' - '.$fetch['varos'].'</option>';
-				}
-				?>
-			</select>
-   		</div>
-		<br>
-		<div class="form-group">
-   			<input type="submit" value="Elküld" class="form-control btn btn-primary"/>
-		</div>
-	</form>
-</div>
-
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
 </div>
-<!-- modal end -->
-<?php endif ?>
+<!-- szerjesztes modal end -->
+
 
 
 <hr>
@@ -147,14 +104,6 @@ include_once('use/u_dao.php');
 <div class="container">
 	<table class="table">
 		<tr>
-			<th>Kijelölés
-				<?php if(isset($_GET['id'])) : ?>
-					<a href="aruk.php">
-						<i class="fa fa-times" aria-hidden="true"></i>
-					</a>
-				<?php endif ?>
-			</th>
-
 			<th>Márka</th>
 			<th>Név</th>
 			<th>Beszerzési ár</th>
@@ -171,15 +120,12 @@ include_once('use/u_dao.php');
 			$adottRaktar = mysqli_fetch_assoc(specific_raktar_lekerdez($fetch['raktar_azonosito']));
 			
 			echo '<tr>';
-			echo '<td><input type="radio" class="form-check-input" onclick="window.location=\'aruk.php?id='. $fetch['azonosito'] .'\'" name="select" value="'. $fetch['azonosito'] .'" ';
-			if(isset($_GET['id']) && $_GET['id'] == $fetch['azonosito']) { echo 'checked'; }
-			echo '>';
 			echo '<td>'. $fetch["marka"] .'</td>';
 			echo '<td>'. $fetch["nev"] .'</td>';
 			echo '<td>'. $fetch["beszerzesi_ar"] .'</td>';
 			echo '<td>'. $fetch["szin"] .'</td>';
 			echo '<td>'. $fetch["raktar_azonosito"]. ' - ' . $adottRaktar['varos'] .'</td>';
-			echo '<td><a class="btn btn-link" href="delete_aru.php?id='.$fetch['azonosito'].'">Törlés</a>';
+			echo '<td><a class="btn btn-link" href="delete_aru.php?id='.$fetch['azonosito'].'">Törlés</a> <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal">Szerkesztés</button></td>';
 			echo '</tr>';
 		} 
 		mysqli_free_result($aruk);

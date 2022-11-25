@@ -32,8 +32,88 @@ function aru_hozzaadasa($marka, $nev, $beszerzesi_ar, $szin, $raktar_azonosito) 
 	$res = mysqli_query($db, $q);
 		
 	mysqli_close($db);
-	return $sikeres;
+	return $res;
 	
+}
+
+function aru_szerkesztese($id, $marka, $nev, $beszerzesi_ar, $szin, $raktar_azonosito) {
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+	
+	$q = "UPDATE aru
+	SET marka = '$marka', nev = '$nev', beszerzesi_ar = '$beszerzesi_ar', szin = '$szin', raktar_azonosito = '$raktar_azonosito'
+	WHERE azonosito = '$id'";
+
+	$res = mysqli_query($db, $q);
+		
+	mysqli_close($db);
+	return $res;
+}
+
+function mozgas_szerkesztese($id, $aru_azonosito, $hova, $irany, $mennyiseg, $mikor, $felugyelo_szigszam) {
+	
+	
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+	
+	$q = "UPDATE mozgas
+	SET aru_azonosito = '$aru_azonosito', hova = '$hova', irany = '$irany', mennyiseg = '$mennyiseg', mikor = '$mikor', felugyelo_szigszam = '$felugyelo_szigszam'
+	WHERE nyugta = '$id'";
+
+	$res = mysqli_query($db, $q);
+		
+	mysqli_close($db);
+	return $res;
+	
+}
+
+function keszlet_szerkesztese($aru_azonosito, $mennyiseg, $kovetkezo_erkezes) {
+	
+	if(!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "UPDATE keszlet
+	SET mennyiseg = '$mennyiseg', kovetkezo_erkezes = '$kovetkezo_erkezes'
+	WHERE aru_azonosito = '$aru_azonosito'";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
+
+function raktar_szerkesztese($azonosito, $orszag, $varos, $irsz, $utca, $hazszam, $kapacitas) {
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "UPDATE raktar
+	SET orszag = '$orszag', varos = '$varos', irsz = '$irsz', utca = '$utca', hazszam = '$hazszam', kapacitas = '$kapacitas'
+	WHERE azonosito = '$azonosito'";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
+
+function szerep_szerkesztese($jogkor_nev, $szemelyzet_szigszam) {
+	if(!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "UPDATE szerep
+	SET jogkor_nev = '$jogkor_nev'
+	WHERE szemelyzet_szigszam = '$szemelyzet_szigszam'";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+
 }
 
 function aruk_lekerdez() {
@@ -66,20 +146,6 @@ function mozgasok_lekerdez() {
 	
 }
 
-function raktar_letrehozasa($orszag, $varos, $irsz, $hazszam, $kapacitas) {
-	if (!($db = db_kapcsolat())) {
-		return false;
-	}
-
-	$q = "INSERT INTO raktar (orszag, varos, irsz, hazszam, kapacitas)
-	VALUES ('$orszag', '$varos', '$irsz', '$hazszam', '$kapacitas')";
-
-	$res = mysqli_query($db, $q);
-
-	mysqli_close($db);
-	return $res;
-}
-
 function raktar_lekerdez() {
 	if (!($db = db_kapcsolat())) {
 		return false;
@@ -99,6 +165,19 @@ function specific_raktar_lekerdez($id) {
 	}
 
 	$q = "SELECT * FROM raktar WHERE azonosito = $id";
+	
+	$res = mysqli_query($db, $q);
+	
+	mysqli_close($db);
+	return $res;
+}
+
+function specific_mozgas_lekerdez($id) {
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "SELECT * FROM mozgas WHERE nyugta = $id";
 	
 	$res = mysqli_query($db, $q);
 	
@@ -171,6 +250,33 @@ function keszlet_torles($id) {
 	return $res;
 }
 
+function szemely_torles($id) {
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "DELETE FROM szemelyzet WHERE szigszam = '$id'";
+
+	$res = mysqli_query($db, $q);
+	
+	mysqli_close($db);
+	return $res;
+}
+
+function szerep_torles($id) {
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "DELETE FROM szerep WHERE szemelyzet_szigszam = '$id'";
+
+	$res = mysqli_query($db, $q);
+	
+	mysqli_close($db);
+	return $res;
+}
+
+
 function szemelyek_lekerdez() {
 	if (!($db = db_kapcsolat())) {
 		return false;
@@ -184,15 +290,42 @@ function szemelyek_lekerdez() {
 	return $res;
 }
 
-function mozgas_hozzaadasa($aru_azonosito, $hova, $irany, $mennyiseg, $felugyelo_szigszam) {
+function szemely_hozzaadasa($szigszam, $vezeteknev, $keresztnev, $nem, $szulido) {
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "INSERT INTO szemelyzet (szigszam, vezeteknev, keresztnev, nem, szulido)
+	VALUES ('$szigszam', '$vezeteknev', '$keresztnev', '$nem', '$szulido')";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
+
+function szerep_lekerdez($id) {
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "SELECT * FROM szerep WHERE szemelyzet_szigszam = '$id'";
+	
+	$res = mysqli_query($db, $q);
+	
+	mysqli_close($db);
+	return $res;
+}
+
+function mozgas_hozzaadasa($aru_azonosito, $hova, $irany, $mennyiseg, $mikor, $felugyelo_szigszam) {
 	
 	
 	if (!($db = db_kapcsolat())) {
 		return false;
 	}
 	
-	$q = "INSERT INTO mozgas (aru_azonosito, hova, irany, mennyiseg, felugyelo_szigszam)
-	VALUES ('$aru_azonosito', '$hova', '$irany', '$mennyiseg', '$felugyelo_szigszam')";
+	$q = "INSERT INTO mozgas (aru_azonosito, hova, irany, mennyiseg, mikor, felugyelo_szigszam)
+	VALUES ('$aru_azonosito', '$hova', '$irany', '$mennyiseg', '$mikor', '$felugyelo_szigszam')";
 
 	$res = mysqli_query($db, $q);
 		
@@ -261,6 +394,62 @@ function keszlet_hozzaadasa($aru_azonosito, $mennyiseg, $kovetkezo_erkezes) {
 	return $res;
 }
 
+function szerep_hozzaadasa($jogkor_nev, $szemelyzet_szigszam) {
+	if(!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "INSERT INTO szerep (jogkor_nev, szemelyzet_szigszam)
+	VALUES ('$jogkor_nev', '$szemelyzet_szigszam')";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+
+}
+
+function jogkorok_lekerdez() {
+	if(!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "SELECT * FROM jogkor ORDER BY prioritas";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
+
+function beosztatlan_lekerdez() {
+	if(!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "SELECT * FROM szemelyzet WHERE szigszam NOT IN (SELECT szemelyzet_szigszam FROM szerep)";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
+
+function feladatok_lekerdez() {
+	if(!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "SELECT * FROM feladat
+	INNER JOIN jogkor
+	ON feladat.jogkor_nev = jogkor.nev
+	ORDER BY jogkor.prioritas DESC";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
 
 function olvasolistatLeker() {
 	
