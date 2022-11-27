@@ -11,7 +11,7 @@ $szemelyzet_szigszam = $_POST['szemelyzet_szigszam'];
 
 if (!empty($jogkor_nev) && !empty($szemelyzet_szigszam)) {
 
-	$res = szerep_szerkesztese($jogkor_nev, $szemelyzet_szigszam);
+	$res = szerep_szerkesztese($jogkor_nev, $szemelyzet_szigszam); 
 	
     if($res) {
 		header("Location: beosztas.php");

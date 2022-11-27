@@ -116,6 +116,21 @@ function szerep_szerkesztese($jogkor_nev, $szemelyzet_szigszam) {
 
 }
 
+function szemely_szerkesztese($szigszam, $vezeteknev, $keresztnev, $nem, $szulido) {
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "UPDATE szemelyzet
+	SET vezeteknev = '$vezeteknev', keresztnev = '$keresztnev', nem = '$nem', szulido = '$szulido'
+	WHERE szigszam = '$szigszam'";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
+
 function aruk_lekerdez() {
 	
 	if (!($db = db_kapcsolat())) {
@@ -255,6 +270,19 @@ function szemely_torles($id) {
 		return false;
 	}
 
+	$q = "SELECT COUNT(*) FROM szerep
+	INNER JOIN szemelyzet ON szemelyzet.szigszam = szerep.szemelyzet_szigszam
+	WHERE szemelyzet.szigszam = '$id'";
+
+	$returnacio = mysqli_fetch_assoc(mysqli_query($db, $q));
+
+	if($returnacio > 0) {
+		$q = "DELETE FROM szerep
+		WHERE szemelyzet_szigszam = '$id'";
+
+		mysqli_query($db, $q);
+	}
+
 	$q = "DELETE FROM szemelyzet WHERE szigszam = '$id'";
 
 	$res = mysqli_query($db, $q);
@@ -290,13 +318,13 @@ function szemelyek_lekerdez() {
 	return $res;
 }
 
-function szemely_hozzaadasa($szigszam, $vezeteknev, $keresztnev, $nem, $szulido) {
+function szemely_hozzaadasa($szigszam, $vezeteknev, $keresztnev, $nem, $szulido, $image) {
 	if (!($db = db_kapcsolat())) {
 		return false;
 	}
 
-	$q = "INSERT INTO szemelyzet (szigszam, vezeteknev, keresztnev, nem, szulido)
-	VALUES ('$szigszam', '$vezeteknev', '$keresztnev', '$nem', '$szulido')";
+	$q = "INSERT INTO szemelyzet (szigszam, vezeteknev, keresztnev, nem, szulido, image)
+	VALUES ('$szigszam', '$vezeteknev', '$keresztnev', '$nem', '$szulido', '$image')";
 
 	$res = mysqli_query($db, $q);
 
@@ -471,6 +499,21 @@ function specific_aru_by_marka($marka) {
 	}
 
 	$q = "SELECT * FROM aru WHERE marka = '$marka'";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
+
+function kep_szerkesztes($id, $kep) {
+	if(!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "UPDATE szemelyzet
+	SET image = '$kep'
+	WHERE szigszam = '$id'";
 
 	$res = mysqli_query($db, $q);
 

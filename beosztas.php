@@ -4,7 +4,7 @@ include_once('use/u_dao.php');
 <!doctype html>
 <html lang="hu">
 <head>
-	<title>Készlet</title>
+	<title>Beosztások</title>
 	<?php include_once('use/head_imports.php'); ?>
 </head>
 
@@ -163,7 +163,10 @@ include_once('use/u_dao.php');
 		while($fetch = mysqli_fetch_assoc($szemelyek)) {
 			$szerep = mysqli_fetch_assoc(szerep_lekerdez($fetch['szigszam']));
 
-            if(!$szerep) $szerep['jogkor_nev'] = "Nincs beosztva";
+            if(!$szerep) {
+				$szerep['jogkor_nev'] = "Nincs beosztva";
+				continue;
+			}	
 			
 			echo '<tr>';
             echo '<td><input type="radio" class="form-check-input" onclick="window.location=\'beosztas.php?id='. $fetch['szigszam'] .'\'" name="select" value="'. $fetch['szigszam'] .'" ';
@@ -175,7 +178,7 @@ include_once('use/u_dao.php');
             echo '<td>'. ($fetch["nem"] ? "férfi" : "nő") .'</td>';
             echo '<td>'. $fetch["szulido"] .'</td>';
             echo '<td>'. $szerep['jogkor_nev'] .'</td>';
-			echo '<td><a href="delete_szemely.php?id='.$fetch['szigszam'].'">Törlés</a></td>';
+			echo '<td><a href="delete_beosztas.php?id='.$fetch['szigszam'].'">Törlés</a></td>';
 			echo '</tr>';
 		} 
 		mysqli_free_result($szemelyek);

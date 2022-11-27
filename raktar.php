@@ -163,7 +163,6 @@ include_once('use/u_dao.php');
 
 		while($fetch = mysqli_fetch_assoc($raktar)) {			
 			echo '<tr>';
-			echo '<tr>';
 			echo '<td><input type="radio" class="form-check-input" onclick="window.location=\'raktar.php?id='. $fetch['azonosito'] .'\'" name="select" value="'. $fetch['azonosito'] .'" ';
 			if(isset($_GET['id']) && $_GET['id'] == $fetch['azonosito']) { echo 'checked'; }
 			echo '>';
