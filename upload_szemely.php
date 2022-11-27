@@ -11,7 +11,6 @@ function kepfeltoltes($alias) {
 	}
 	else {
 		echo "Hiba a kép feltöltésekor! <a href='szemelyzet.php'>Vissza</a>";
-		die();
 	}
 }
 

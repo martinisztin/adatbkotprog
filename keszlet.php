@@ -36,7 +36,7 @@ include_once('use/u_dao.php');
    			<label>Áru azonosítója: </label>
    			<select name="aru_azonosito" class="form-control form-select">
 				<?php 
-				$aruk = aruk_lekerdez();
+				$aruk = nem_keszletezett_aru_lekerdez();
 				while($fetch = mysqli_fetch_assoc($aruk)) {
 					echo '<option value='.$fetch['azonosito'].'>'.$fetch['azonosito'].' - '.$fetch['marka']. ' ' . $fetch['nev'] .'</option>';
 				}

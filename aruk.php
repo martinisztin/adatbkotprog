@@ -17,6 +17,9 @@ include_once('use/u_dao.php');
 	<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#ujRekord">
   		Új áru hozzáadása
 	</button>
+	<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#statisztika">
+  		Statisztika
+	</button>
 	<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#szerkesztesModal" <?php if(!isset($_GET['id'])) {echo 'disabled';} ?>>
   		Szerkesztés
 	</button>
@@ -146,10 +149,6 @@ include_once('use/u_dao.php');
 <?php endif ?>
 
 <!-- szures modal -->
-<?php 
-
-
-?>
 <div class="modal fade" id="szuresModal" tabindex="-1" aria-labelledby="szuresModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -184,6 +183,65 @@ include_once('use/u_dao.php');
   </div>
 </div>
 <!-- modal end -->
+
+<!-- stat modal -->
+<div class="modal fade" id="statisztika" tabindex="-1" aria-labelledby="statisztikaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="statisztikaLabel">Statisztika</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+	 	<div class="container" style="width:400px;">
+				<h3>2022-ben márka szerint ezek az áruk érkeznek még!</h1>
+				<table class="table">
+					<tr>
+						<th>Márka</th>
+						<th>Darab</th>
+					</tr>
+
+					<?php
+						
+						$szurt_aruk = idei_erkezo_marka_statisztika();
+
+						while($fetch = mysqli_fetch_assoc($szurt_aruk)) {
+							echo '<tr>';
+							echo '<td>' . $fetch['marka'] . '</td>';
+							echo '<td>' . $fetch['darab'] . '</td>';
+							echo '</tr>';
+						}
+
+						mysqli_free_result($szurt_aruk);
+						?>
+
+				</table>
+				<hr>
+				<br>
+				<h3>A legsűrűbben eladott márka!</h3>
+				<?php
+					$leghiresebb = mysqli_fetch_assoc(legeladottabb_marka());
+
+				?>
+				<table class="table">
+					<tr>
+						<th>Termék</th>
+						<th>Eladások száma</th>
+					</tr>
+					<tr>
+						<td><?= $leghiresebb['marka'] . ' ' . $leghiresebb['nev'] ?></td>
+						<td><?= $leghiresebb['eladas'] ?></td>
+					</tr>
+				</table>
+		</div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!-- modal end -->
+
 
 
 <hr>

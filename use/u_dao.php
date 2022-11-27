@@ -137,7 +137,7 @@ function aruk_lekerdez() {
 		return false;
 	}
 
-	$q = "SELECT * FROM aru";
+	$q = "SELECT * FROM aru ORDER BY marka";
 	
 	$res = mysqli_query($db, $q);
 	
@@ -152,7 +152,7 @@ function mozgasok_lekerdez() {
 		return false;
 	}
 
-	$q = "SELECT * FROM mozgas";
+	$q = "SELECT * FROM mozgas ORDER BY mikor";
 	
 	$res = mysqli_query($db, $q);
 	
@@ -166,7 +166,7 @@ function raktar_lekerdez() {
 		return false;
 	}
 
-	$q = "SELECT * FROM raktar";
+	$q = "SELECT * FROM raktar ORDER BY azonosito";
 	
 	$res = mysqli_query($db, $q);
 	
@@ -179,7 +179,7 @@ function specific_raktar_lekerdez($id) {
 		return false;
 	}
 
-	$q = "SELECT * FROM raktar WHERE azonosito = $id";
+	$q = "SELECT * FROM raktar WHERE azonosito = $id ORDER BY azonosito";
 	
 	$res = mysqli_query($db, $q);
 	
@@ -192,7 +192,7 @@ function specific_mozgas_lekerdez($id) {
 		return false;
 	}
 
-	$q = "SELECT * FROM mozgas WHERE nyugta = $id";
+	$q = "SELECT * FROM mozgas WHERE nyugta = $id ORDER BY mikor";
 	
 	$res = mysqli_query($db, $q);
 	
@@ -205,7 +205,7 @@ function specific_szemely_lekerdez($id) {
 		return false;
 	}
 
-	$q = "SELECT * FROM szemelyzet WHERE szigszam = '$id'";
+	$q = "SELECT * FROM szemelyzet WHERE szigszam = '$id' ORDER BY vezeteknev, keresztnev";
 	
 	$res = mysqli_query($db, $q);
 	
@@ -218,7 +218,7 @@ function specific_aru_lekerdez($id) {
 		return false;
 	}
 
-	$q = "SELECT * FROM aru WHERE azonosito = $id";
+	$q = "SELECT * FROM aru WHERE azonosito = $id ORDER BY marka";
 	
 	$res = mysqli_query($db, $q);
 	
@@ -291,6 +291,42 @@ function szemely_torles($id) {
 	return $res;
 }
 
+function idei_erkezo_marka_statisztika() {
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	//2022-ben még érkező áruk márka szerint 
+	$q = "SELECT marka, COUNT(*) AS darab FROM aru 
+	INNER JOIN keszlet ON aru.azonosito = keszlet.aru_azonosito
+	WHERE YEAR(keszlet.kovetkezo_erkezes) = 2022
+	GROUP BY marka";
+
+	$res = mysqli_query($db, $q);
+	
+	mysqli_close($db);
+	return $res;
+}
+
+function legeladottabb_marka() {
+	if (!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	//legtöbbet kifele mozgó áru
+	$q = "SELECT marka, nev, SUM(mozgas.mennyiseg) as eladas FROM aru 
+	INNER JOIN mozgas ON aru.azonosito = mozgas.aru_azonosito
+	WHERE mozgas.irany = 'kifele'
+	GROUP BY marka
+	ORDER BY eladas DESC
+	LIMIT 1";
+
+	$res = mysqli_query($db, $q);
+	
+	mysqli_close($db);
+	return $res;
+}
+
 function szerep_torles($id) {
 	if (!($db = db_kapcsolat())) {
 		return false;
@@ -310,7 +346,7 @@ function szemelyek_lekerdez() {
 		return false;
 	}
 
-	$q = "SELECT * FROM szemelyzet";
+	$q = "SELECT * FROM szemelyzet ORDER BY vezeteknev, keresztnev";
 	
 	$res = mysqli_query($db, $q);
 	
@@ -337,7 +373,7 @@ function szerep_lekerdez($id) {
 		return false;
 	}
 
-	$q = "SELECT * FROM szerep WHERE szemelyzet_szigszam = '$id'";
+	$q = "SELECT * FROM szerep WHERE szemelyzet_szigszam = '$id' ORDER BY jogkor_nev";
 	
 	$res = mysqli_query($db, $q);
 	
@@ -463,6 +499,19 @@ function beosztatlan_lekerdez() {
 	return $res;
 }
 
+function nem_keszletezett_aru_lekerdez() {
+	if(!($db = db_kapcsolat())) {
+		return false;
+	}
+
+	$q = "SELECT * FROM aru WHERE azonosito NOT IN (SELECT aru_azonosito FROM keszlet)";
+
+	$res = mysqli_query($db, $q);
+
+	mysqli_close($db);
+	return $res;
+}
+
 function feladatok_lekerdez() {
 	if(!($db = db_kapcsolat())) {
 		return false;
@@ -498,7 +547,7 @@ function specific_aru_by_marka($marka) {
 		return false;
 	}
 
-	$q = "SELECT * FROM aru WHERE marka = '$marka'";
+	$q = "SELECT * FROM aru WHERE marka = '$marka' ORDER BY marka";
 
 	$res = mysqli_query($db, $q);
 
@@ -519,111 +568,4 @@ function kep_szerkesztes($id, $kep) {
 
 	mysqli_close($db);
 	return $res;
-}
-
-function olvasolistatLeker() {
-	
-	if ( !($conn = db_kapcsolat()) ) { // ha nem sikerult csatlakozni, akkor kilepunk
-		return false;
-	}
-	
-	// elokeszitjuk az utasitast
-	$result = mysqli_query( $conn,"SELECT olvasojegy, nev, szuldatum, lakcim FROM OLVASOK");
-	
-	mysqli_close($conn);
-	return $result;
-}
-
-function olvasot_beszur($olvasojegy, $nev, $szuldatum, $lakcim) {
-	if ( !($conn = db_kapcsolat()) ) { // ha nem sikerult csatlakozni, akkor kilepunk
-		return false;
-	}
-	
-	
-	// elokeszitjuk az utasitast
-	$stmt = mysqli_prepare( $conn,"INSERT INTO OLVASOK(olvasojegy, nev, szuldatum, lakcim) VALUES (?, ?, ?, ?)");
-	
-	// bekotjuk a parametereket (igy biztonsagosabb az adatkezeles)
-	mysqli_stmt_bind_param($stmt, "dsss", $olvasojegy, $nev, $szuldatum, $lakcim);
-	
-	// lefuttatjuk az SQL utasitast
-	$sikeres = mysqli_stmt_execute($stmt); 
-		// ez logikai erteket ad vissza, ami megmondja, hogy sikerult-e 
-		// vegrehajtani az utasitast 
-		
-	mysqli_close($conn);
-	return $sikeres;
-	
-}
-
-
-function szabad_konyveket_listaz() {
-	
-	if ( !($conn = db_kapcsolat()) ) { // ha nem sikerult csatlakozni, akkor kilepunk
-		return false;
-	}
-	
-	// elokeszitjuk az utasitast
-	$result = mysqli_query( $conn,"SELECT konyvszam, CONCAT(konyvszam, ' - ', szerzo, ': ', cim, '. ', kiado, ' ', ev) AS konyv FROM KONYVEK WHERE olvasojegy IS NULL") or die(mysqli_error($conn));
-	
-	
-	mysqli_close($conn);
-	return $result;
-}
-
-function kolcsonzott_konyvek_listaja() {
-	if ( !($conn = db_kapcsolat()) ) { // ha nem sikerult csatlakozni, akkor kilepunk
-		return false;
-	}
-	
-	// elokeszitjuk az utasitast
-	$result = mysqli_query( $conn,"SELECT konyvszam, cim, szerzo, kiado, ev, CONCAT(OLVASOK.olvasojegy, ' - ', OLVASOK.nev) AS olvaso FROM KONYVEK, OLVASOK WHERE KONYVEK.olvasojegy = OLVASOK.olvasojegy") or die(mysqli_error($conn));
-	
-	
-	mysqli_close($conn);
-	return $result;
-}
-
-function kolcsonzest_beszur($konyvszam, $olvasojegy) {
-	if ( !($conn = db_kapcsolat()) ) { // ha nem sikerult csatlakozni, akkor kilepunk
-		return false;
-	}
-	
-	
-	// elokeszitjuk az utasitast
-	$stmt = mysqli_prepare( $conn,"UPDATE KONYVEK SET olvasojegy = ? WHERE konyvszam = ?");
-	
-	
-	// bekotjuk a parametereket (igy biztonsagosabb az adatkezeles)
-	mysqli_stmt_bind_param($stmt, "ds", $olvasojegy, $konyvszam);
-	
-	// lefuttatjuk az SQL utasitast
-	$sikeres = mysqli_stmt_execute($stmt); 
-		// ez logikai erteket ad vissza, ami megmondja, hogy sikerult-e 
-		// vegrehajtani az utasitast 
-		
-	mysqli_close($conn);
-	return $sikeres;
-}
-
-function kolcsonzes_torlese($konyvszam) {
-	if ( !($conn = db_kapcsolat()) ) { // ha nem sikerult csatlakozni, akkor kilepunk
-		return false;
-	}
-	
-	
-	// elokeszitjuk az utasitast
-	$stmt = mysqli_prepare( $conn,"UPDATE KONYVEK SET olvasojegy = NULL WHERE konyvszam = ?");
-	
-	
-	// bekotjuk a parametereket (igy biztonsagosabb az adatkezeles)
-	mysqli_stmt_bind_param($stmt, "s", $konyvszam);
-	
-	// lefuttatjuk az SQL utasitast
-	$sikeres = mysqli_stmt_execute($stmt); 
-		// ez logikai erteket ad vissza, ami megmondja, hogy sikerult-e 
-		// vegrehajtani az utasitast 
-		
-	mysqli_close($conn);
-	return $sikeres;
 }
